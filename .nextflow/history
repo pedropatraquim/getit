@@ -1,2 +1,0 @@
-2020-11-21 20:36:43	802ms	happy_venter	OK	bb4ad37eeb24e2b4f8c71b724b233d67	5b89bd6f-ae7a-4a0d-bcea-29ac938013b1	nextflow run main.nf
-2020-11-21 20:36:58	-	ecstatic_yalow	-	bb4ad37eeb24e2b4f8c71b724b233d67	4b207b00-caf4-48f6-8225-eaff635d82d6	nextflow run main.nf --help
