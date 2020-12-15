@@ -44,7 +44,7 @@ process get_queries {
   tag "getting sequence for query $id"
   //echo true
   publishDir "$params.outdir/$id/" 
-  errorStrategy 'ignore'
+  //errorStrategy 'ignore'
 
   input:
     val id 
