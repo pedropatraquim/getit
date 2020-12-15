@@ -1,0 +1,9 @@
+name: getit-env
+channels:
+  - conda-forge
+  - bioconda
+  - defaults
+dependencies:
+  - samtools=1.6
+  - mafft=7.475
+  - hmmer=3.3.1
