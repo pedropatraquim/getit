@@ -85,6 +85,8 @@ process get_hits {
   //echo true
   publishDir "$params.outdir/$id/$lib/"
   //errorStrategy 'ignore'
+  cpus 1
+
   input:
     tuple val(id),val(lib),path ('lib.fasta'),path("doms.txt") from jackhmmerTables
   output:
@@ -124,7 +126,7 @@ process find_reciprocal_hits{
   //echo true
   publishDir "$params.outdir/$id/$lib/hits/"
   errorStrategy 'ignore'
-  
+  cpus 1
 
 
   input:
@@ -142,7 +144,8 @@ process get_reciprocal_seqs {
   tag "get sequences of reciprocal hits $hit for $id at $lib"
   //echo true
   publishDir "$params.outdir/$id/$lib/hits/"
-  
+  cpus 1
+
   input:
     tuple val(hit),val(id),val(lib),path ('lib.fasta') from reciprocal_hits.splitCsv()
   
@@ -161,7 +164,8 @@ process alingments {
   //echo true
   publishDir "$params.outdir/$id/$lib/hits/$hit"
   //errorStrategy 'finish'
-  
+  cpus 8
+
   input:
     tuple val(hit),val(id),val(lib),path (hit_fasta) from reciprocal_hits_seqs
      
@@ -183,7 +187,8 @@ process score_alignments {
   
   tag "score alignments for $id and $lib"
   publishDir "$params.outdir/$id/$lib/hits/$hit"
-  
+  cpus 1
+
   input:
     tuple val(hit),val (id),val(lib),path(aln_file) from alignments
   output: 
@@ -212,6 +217,8 @@ process score_alignments {
 process collect_scores {
   tag "collect scores in single file for query $id"
   publishDir "$params.outdir/$id/"
+  cpus 1
+  
   input:
      tuple val(id),path(score_file) from scores.groupTuple()
   output:
