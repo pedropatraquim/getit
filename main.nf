@@ -45,6 +45,7 @@ process get_queries {
   //echo true
   publishDir "$params.outdir/$id/" 
   //errorStrategy 'ignore'
+  cpus 1
 
   input:
     val id 
