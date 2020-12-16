@@ -185,7 +185,7 @@ process alingments {
 
 process score_alignments {
   
-  tag "score alignments for $id and $lib"
+  tag "score alignments for $id and $hit from $lib"
   publishDir "$params.outdir/$id/$lib/hits/$hit"
   cpus 1
 
