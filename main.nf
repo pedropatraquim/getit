@@ -15,7 +15,7 @@ def helpMessage() {
     The typical command for running the pipeline is as follows:
 
     nextflow run  -profile standard --outdir /output/path --ids ids_file.txt
-    
+
     Options:
       --ids                         file containing the ids of the proteins, one per line
       --db                          path to main db
@@ -43,12 +43,12 @@ libs = Channel.fromPath(params.libs).
 process get_queries {
   tag "getting sequence for query $id"
   //echo true
-  publishDir "$params.outdir/$id/" 
+  publishDir "$params.outdir/$id/"
   //errorStrategy 'ignore'
   cpus 1
 
   input:
-    val id 
+    val id
 
   output:
     tuple val(id), path('*.fasta') optional true into seqsOut
@@ -69,7 +69,7 @@ process jackhammer {
 
   input:
     tuple val(id), path('sequence.fasta'),val(lib),path("lib.fasta") from seqsOut.combine(libs)
-    
+
   output:
     tuple val(id),val(lib),path ('lib.fasta'),file("*_doms.txt") into jackhmmerTables
     path "*_table.txt"
@@ -91,7 +91,7 @@ process get_hits {
     tuple val(id),val(lib),path ('lib.fasta'),path("doms.txt") from jackhmmerTables
   output:
     tuple val(id),val(lib),path ('lib.fasta'),path("*_hits.fasta") optional true into fastas
-  
+
   script:
   """
     grep -v "#" doms.txt  | cut -f1 -d" "| sort | uniq | grep . | cat > ${lib}_ids.txt
@@ -114,7 +114,7 @@ process reciprocal_jackhammers {
       tuple val(id),val(lib),path ('lib.fasta'),path("hits.fasta") from fastas
     output:
       tuple val(id),val(lib),path ('lib.fasta'),path("hits_doms.txt") into reciprocal_jackhammers
-      
+
   script:
   """
     jackhmmer  --seed 1 --cpu $task.cpus -o hits_out.txt --domtblout hits_doms.txt hits.fasta $params.db
@@ -148,10 +148,10 @@ process get_reciprocal_seqs {
 
   input:
     tuple val(hit),val(id),val(lib),path ('lib.fasta') from reciprocal_hits.splitCsv()
-  
+
   output:
     tuple val(hit),val(id),val(lib),path ("*.fasta") into reciprocal_hits_seqs
-  
+
   script:
   """
     samtools faidx lib.fasta $hit -o ${hit}.fasta
@@ -168,12 +168,12 @@ process alingments {
 
   input:
     tuple val(hit),val(id),val(lib),path (hit_fasta) from reciprocal_hits_seqs
-     
+
   output:
     tuple val(hit),val(id),val(lib),path("*.aln") into alignments
 
   script:
-  
+
   """
     cat $launchDir/$params.outdir/$id/${id}.fasta  $hit_fasta  > aln.fasta ;
     mafft --thread $task.cpus --clustalout --reorder --maxiterate 1000 --retree 1 --globalpair aln.fasta > ${hit}.aln
@@ -184,20 +184,20 @@ process alingments {
 
 
 process score_alignments {
-  
+
   tag "score alignments for $id and $hit from $lib"
   publishDir "$params.outdir/$id/$lib/hits/$hit"
   cpus 1
 
   input:
     tuple val(hit),val (id),val(lib),path(aln_file) from alignments
-  output: 
+  output:
     tuple val(id), path( "*_score.txt") into scores
     path("*_lenght.txt")
   script:
   """
     #!/usr/bin/env perl
-    
+
     open FILE,"$aln_file";
     \$seq_length=`grep $hit $aln_file | tr  -s " " "\\t"  | cut -f2  | tr -d "-" | tr -d "\\n" | wc -c`;
     open L,">${hit}_lenght.txt";
@@ -205,11 +205,11 @@ process score_alignments {
     open OUT,">${hit}_score.txt";
     while(<FILE>){
       next unless /[\\*:.]/;
-      \$asterisk=  tr/\\*//; 
-      \$colon=  tr/://; 
-      \$dot=  tr/\\.//; 
-      \$score=(\$asterisk*100+\$colon*70+\$dot*30)/\$seq_length;
-    } 
+      \$asterisk=  tr/\\*//;
+      \$colon=  tr/://;
+      \$dot=  tr/\\.//;
+      \$score=(\$asterisk*100+\$colon*50+\$dot*40)/\$seq_length;
+    }
     print OUT "$lib\t$hit\t\$score\\n";
   """
 }
@@ -218,7 +218,7 @@ process collect_scores {
   tag "collect scores in single file for query $id"
   publishDir "$params.outdir/$id/"
   cpus 1
-  
+
   input:
      tuple val(id),path(score_file) from scores.groupTuple()
   output:
@@ -236,5 +236,3 @@ if (params.help){
   helpMessage()
   exit 0
 }
-
-
