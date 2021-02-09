@@ -208,7 +208,7 @@ process score_alignments {
       \$asterisk=  tr/\\*//;
       \$colon=  tr/://;
       \$dot=  tr/\\.//;
-      \$score=(\$asterisk*100+\$colon*50+\$dot*40)/\$seq_length;
+      \$score=(\$asterisk*100+\$colon*70+\$dot*30)/\$seq_length;
     }
     print OUT "$lib\t$hit\t\$score\\n";
   """
